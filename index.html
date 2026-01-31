@@ -7,10 +7,22 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>📚 見てほしい動画リスト</h1>
-        
-        <div class="video-grid">
+    <!-- パスワード認証画面 -->
+    <div id="passwordScreen" class="password-screen">
+        <div class="password-container">
+            <h2>🔐 パスワードが必要です</h2>
+            <input type="password" id="passwordInput" placeholder="パスワードを入力してください" class="password-input">
+            <button onclick="checkPassword()" class="password-button">確認</button>
+            <p id="errorMessage" class="error-message"></p>
+        </div>
+    </div>
+
+    <!-- メインコンテンツ（初期非表示） -->
+    <div id="mainContent" class="hidden">
+        <div class="container">
+            <h1 id="mainTitle">📚 動画リスト</h1>
+            
+            <div class="video-grid">
             <!-- 図形3 -->
             <div class="video-card">
                 <div class="video-title">図形3</div>
@@ -145,7 +157,66 @@
                     <iframe src="https://www.youtube.com/embed/vAFHoANMB4Y" allowfullscreen></iframe>
                 </div>
             </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        const CORRECT_PASSWORD = '宿題';
+
+        // Enterキーでも送信できるように
+        document.getElementById('passwordInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                checkPassword();
+            }
+        });
+
+        function checkPassword() {
+            const input = document.getElementById('passwordInput').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (input === CORRECT_PASSWORD) {
+                document.getElementById('passwordScreen').style.display = 'none';
+                document.getElementById('mainContent').classList.remove('hidden');
+                localStorage.setItem('authenticated', 'true');
+            } else {
+                errorMessage.textContent = 'パスワードが違います。もう一度試してください。';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        // ページロード時に認証状態を確認
+        window.addEventListener('load', function() {
+            if (localStorage.getItem('authenticated') === 'true') {
+                document.getElementById('passwordScreen').style.display = 'none';
+                document.getElementById('mainContent').classList.remove('hidden');
+            }
+            updateCountdown();
+            // 毎日0時に更新
+            setInterval(updateCountdown, 1000 * 60 * 60 * 24);
+        });
+
+        function updateCountdown() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const examDate = new Date(2026, 2, 5); // 2026年3月5日
+            examDate.setHours(0, 0, 0, 0);
+            
+            const timeDiff = examDate - today;
+            const daysLeft = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+            
+            const titleElement = document.getElementById('mainTitle');
+            if (titleElement) {
+                if (daysLeft > 0) {
+                    titleElement.textContent = `📚 動画リスト（試験日まであと${daysLeft}日）`;
+                } else if (daysLeft === 0) {
+                    titleElement.textContent = '📚 動画リスト（試験日は今日です！）';
+                } else {
+                    titleElement.textContent = '📚 動画リスト（試験終了）';
+                }
+            }
+        }
+    </script>
 </body>
 </html>
