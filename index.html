@@ -18,7 +18,7 @@
     </div>
 
     <!-- メインコンテンツ（初期非表示） -->
-    <div id="mainContent" class="hidden">
+    <div id="mainContent" style="display: none;">
         <div class="container">
             <h1 id="mainTitle">📚 動画リスト</h1>
             
@@ -164,11 +164,23 @@
     <script>
         const CORRECT_PASSWORD = '宿題';
 
-        // Enterキーでも送信できるように
-        document.getElementById('passwordInput').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                checkPassword();
+        // DOMContentLoadedで実行
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enterキーでも送信できるように
+            document.getElementById('passwordInput').addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    checkPassword();
+                }
+            });
+            
+            // ページロード時に認証状態を確認
+            if (localStorage.getItem('authenticated') === 'true') {
+                document.getElementById('passwordScreen').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
             }
+            updateCountdown();
+            // 毎日0時に更新
+            setInterval(updateCountdown, 1000 * 60 * 60 * 24);
         });
 
         function checkPassword() {
@@ -177,24 +189,13 @@
 
             if (input === CORRECT_PASSWORD) {
                 document.getElementById('passwordScreen').style.display = 'none';
-                document.getElementById('mainContent').classList.remove('hidden');
+                document.getElementById('mainContent').style.display = 'block';
                 localStorage.setItem('authenticated', 'true');
             } else {
                 errorMessage.textContent = 'パスワードが違います。もう一度試してください。';
                 document.getElementById('passwordInput').value = '';
             }
         }
-
-        // ページロード時に認証状態を確認
-        window.addEventListener('load', function() {
-            if (localStorage.getItem('authenticated') === 'true') {
-                document.getElementById('passwordScreen').style.display = 'none';
-                document.getElementById('mainContent').classList.remove('hidden');
-            }
-            updateCountdown();
-            // 毎日0時に更新
-            setInterval(updateCountdown, 1000 * 60 * 60 * 24);
-        });
 
         function updateCountdown() {
             const today = new Date();
